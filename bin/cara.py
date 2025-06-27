@@ -36,3 +36,34 @@ parser.add_argument('-o', '--output',
 args = parser.parse_args()
 
 
+
+class Config:
+    """
+    This class is used for parsing and storing the CARA configuration file. 
+    """
+    def __init__(self, file = None):
+        self.config_data = {}
+        self.load_config_file(file, "=")
+        
+    def load_config_file(self, file, delimiter):
+        if not file:
+            return
+
+        with open(file, "r") as f:
+            for line in f:
+                line = line.split("#", 1)[0].strip()  # Remove comments and whitespace
+                if not line:
+                    continue  # Skip empty lines
+                if delimiter not in line:
+                    continue  # Skip malformed lines
+                key, value = line.split(delimiter, 1)
+                self.config_data[key.strip()] = value.strip()
+        
+    def get(self, key, default = None):
+        return self.config_data.get(key, default)
+
+    def set(self, key, value):
+        self.config_data[key] = value
+    
+    
+
