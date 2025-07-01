@@ -160,15 +160,29 @@ class GitLogEntry:
 
 
 class GitLog:
-    def __init__(self, repo_path):
+    """
+    Handles parsing and storing Git log data for a given repository.
+
+    Attributes:
+        repo_path (str): Path to the Git repository.
+        entries (list): A list of GitLogEntry objects parsed from the Git log.
+    """
+    def __init__(self, repo_path="."):
+    
         self.repo_path = repo_path
         self.entries = []
 
     def parse_log(self):
+        """
+        Executes 'git log' on the specified repository and parses each commit entry
+        into GitLogEntry objects. Entries are stored in the 'entries' list.
+
+        Ignores lines that do not match the expected format.
+        """
         format_str = "%H|%an|%ad|%s"
         try:
             raw_output = subprocess.check_output(
-                ["git", "-C", self.repo_path, "log", f"--pretty=format:{format_str}", "--date=short"],
+                ["git", "-C", self.repo_path, "log", f"--pretty=format:'{format_str}'", "--date=short"],
                 universal_newlines=True
             )
         except subprocess.CalledProcessError:
@@ -187,6 +201,44 @@ class GitLog:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+def main():
+    """
+    Main entry point for the CARA application. Handles argument parsing,
+    configuration loading, Git log parsing, and basic flow control.
+    """
+    # Parse CLI arguments
+    cli = CLIArgs()
+
+    # Load configuration file
+    config = Config(cli.config)
+
+    # Parse git log
+    gitlog = GitLog(repo_path=cli.repo_path)
+    gitlog.parse_log()
+
+    # Display log entries if verbose mode is enabled
+    if cli.verbose:
+        print("Detected git log entiries:")
+        for entry in gitlog.get_entries():
+            print(entry)
+
+    # Placeholder for additional functionality
+    # e.g., generate changelog, write to output file, etc.
+
+
+if __name__ == "__main__":
+    main()
 
 
 
