@@ -277,6 +277,9 @@ class GitLog:
                 
                 # There is an extra ' character at the start and end, the [1:] and [:-1] trims those.
                 self.entries.append(GitLogEntry(commit[1:], author, full_date, display_date, message[:-1]))
+               
+        # Remove duplicate entries.
+        self.entries = self.remove_duplicates_by_day_and_message(self.entries)
 
     def get_entries(self):
         return self.entries
@@ -287,7 +290,29 @@ class GitLog:
         """
         for entry in self.entries:
             print(f"{entry.full_date} | {entry.author} | {entry.commit[:7]} - {entry.message}")
+            
+    def remove_duplicates_by_day_and_message(self, entries):
+        """
+        Removes duplicates from a list of GitLogEntry objects where entries
+        have the same display_date and identical commit messages.
 
+        Args:
+            entries (list of GitLogEntry): List of commit entries.
+
+        Returns:
+            list of GitLogEntry: Filtered list with duplicates removed.
+        """
+        seen = set()
+        unique_entries = []
+
+        for entry in entries:
+            key = (entry.display_date, entry.message.strip())
+
+            if key not in seen:
+                seen.add(key)
+                unique_entries.append(entry)
+
+        return unique_entries
 
 
 class ChangelogGenerator:
