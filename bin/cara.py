@@ -39,7 +39,9 @@ args = parser.parse_args()
 
 class Config:
     """
-    This class is used for parsing and storing the CARA configuration file. 
+    This class is used for parsing and storing the CARA configuration file. For
+    detailed information on valid configuration values and what they do, see the main
+    documentation.
     """
     def __init__(self, file = None):
         self.config_data = {}
