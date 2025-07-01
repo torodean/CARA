@@ -11,6 +11,8 @@
 ## features to match various functionalities.
 ##############################################################
 
+from collections import defaultdict
+import datetime
 # Used for adding application parameters.
 import argparse
 import subprocess
@@ -152,13 +154,15 @@ class GitLogEntry:
     Attributes:
         commit (str): The full SHA-1 hash of the commit.
         author (str): The name of the author of the commit.
-        date (str): The commit date formatted based on the config file.
+        full_date (str): The commit date containing enough details for parsing the info later.
+        display_date (str): The commit date formatted based on the config file for display.
         message (str): The commit message summary.
     """
-    def __init__(self, commit, author, date, message):
+    def __init__(self, commit, author, full_date, display_date, message):
         self.commit = commit
         self.author = author
-        self.date = date
+        self.full_date = full_date
+        self.display_date = display_date
         self.message = message
 
     def __repr__(self):
@@ -166,12 +170,12 @@ class GitLogEntry:
         Returns a concise string representation of the GitLogEntry instance.
 
         The output includes the first 7 characters of the commit hash,
-        the author's name, and the commit date.
+        the author's name, and the commit display_date.
 
         Returns:
             str: A string in the format "<abc1234 - Author Name - Date>".
         """
-        return f"<{self.commit[:7]} - {self.author} - {self.date}>"
+        return f"<{self.commit[:7]} - {self.author} - {self.display_date}>"
 
 
 class GitLog:
@@ -209,17 +213,38 @@ class GitLog:
                     ["git", "-C", self.repo_path, "log", f"--pretty=format:'{format_str}'"],
                     universal_newlines=True
                 )
+                
+            # This is used for parsing dates later.
+            full_date_output = subprocess.check_output(
+                ["git", "-C", self.repo_path, "log", f"--pretty=format:'{format_str}'", f"--date=format:%Y,%m,%d,%A,%B"],
+                universal_newlines=True
+            )
         except subprocess.CalledProcessError:
             return
 
-        for line in raw_output.strip().split("\n"):
+        lines = raw_output.strip().split("\n")
+        full_dates = full_date_output.strip().split("\n")
+        
+        for idx, line in enumerate(lines):
             parts = line.split("|", 3)
+            parts_full_date = full_dates[idx].split("|", 3)
             if len(parts) == 4:
-                commit, author, date, message = parts
-                self.entries.append(GitLogEntry(commit, author, date, message))
+                commit, author, display_date, message = parts
+                _, _, full_date,_ = parts_full_date
+                
+                # There is an extra ' character at the start and end, the [1:] and [:-1] trims those.
+                self.entries.append(GitLogEntry(commit[1:], author, full_date, display_date, message[:-1]))
 
     def get_entries(self):
         return self.entries
+        
+    def print_entries(self):
+        """
+        Prints all parsed Git log entries in a formatted list.
+        """
+        for entry in self.entries:
+            print(f"{entry.full_date} | {entry.author} | {entry.commit[:7]} - {entry.message}")
+
 
 
 class ChangelogGenerator:
@@ -243,13 +268,27 @@ class ChangelogGenerator:
         self.gitlog = gitlog
         self.config = config
         self.entries = gitlog.get_entries()
+        self.full_dates = self.entries[2] # the index of the full_dates field.
         self.output = []
         
     def format_entry(self, entry):
         """
         This will format the entry based on various parameters.
         """
-        return f"- {entry.date} {entry.author}: {entry.message} ({entry.commit[:7]})"
+        output_entries = self.config.get("OUTPUT_ENTRIES").split(" ")
+        output = ""
+        
+        if (output_entries == "all"):
+            output = f"{entry.commit}: {entry.author} - {entry.message}"
+        else:
+            if ("commit" in output_entries):
+                output += f"{entry.commit}: "
+            if ("author" in output_entries):
+                output += f"{entry.author} - "
+            if ("message" in output_entries):
+                output += f"{entry.message}"
+        
+        return output
 
     def generate(self):
         """
@@ -258,10 +297,17 @@ class ChangelogGenerator:
         Returns:
             str: A formatted changelog string.
         """
+        unit = self.config.get("GROUP_BY", "day")
+        grouped = self.group_by_time_unit(unit)
+        
         output = ["# Changelog\n"]
-        for entry in self.entries:
-            line = format_entry(entry)
-            output.append(line)
+        for key, entries in grouped.items():
+            output.append(f"## {key}")
+            for entry in entries:
+                line = self.format_entry(entry)
+                output.append(line)
+                
+            output.append("\n") # Add a newline between sections.
 
         return "\n".join(output)
 
@@ -276,6 +322,39 @@ class ChangelogGenerator:
         with open(path, "w") as f:
             f.write(changelog)
 
+    def group_by_time_unit(self, unit):
+        """
+        Groups entries by a given time unit: 'day', 'week', 'month', or 'year'.
+        Returns a dictionary where keys are the time period identifiers and values are lists of entries.
+
+        Args:
+            unit (str): The time unit to group by. One of 'day', 'week', 'month', 'year'.
+
+        Returns:
+            dict: A dictionary grouped by time unit.
+        """
+        valid_units = {"day", "week", "month", "year"}
+        if unit not in valid_units:
+            raise ValueError(f"Invalid grouping unit '{unit}'. Choose from: {', '.join(valid_units)}")
+
+        grouped = defaultdict(list)
+        for entry in self.entries:
+            y, m, d, _, _ = entry.full_date.split(",")
+            y, m, d = int(y), int(m), int(d)
+            dt = datetime.date(y, m, d)
+
+            if unit == "day":
+                key = dt.isoformat()
+            elif unit == "week":
+                key = f"{dt.isocalendar().year}-W{dt.isocalendar().week:02d}"
+            elif unit == "month":
+                key = f"{y}-{m:02d}"
+            elif unit == "year":
+                key = str(y)
+
+            grouped[key].append(entry)
+            
+        return dict(grouped)
 
 
 
@@ -311,8 +390,10 @@ def main():
         for entry in gitlog.get_entries():
             print(entry)
 
-    # Placeholder for additional functionality
-    # e.g., generate changelog, write to output file, etc.
+    # Generate the changelog
+    generator = ChangelogGenerator(gitlog, config)
+    generator.write_to_file(cli.output_file)
+
 
 
 if __name__ == "__main__":

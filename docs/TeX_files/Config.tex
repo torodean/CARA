@@ -30,7 +30,7 @@ This format provides clarity and simplicity, ensuring easy editing and version c
 
 
 
-\subsection{DATE\_FORMAT Configuration Option}
+\section{DATE\_FORMAT Configuration Option}
 
 The \texttt{DATE\_FORMAT} option in the configuration file allows users to control the format in which commit dates are displayed in the generated changelog. This option directly maps to the \texttt{--date=format:<str>} flag in \texttt{git log}, enabling a wide range of formatting options based on user preferences or documentation standards. If this option is defined in the configuration file, CARA will invoke \texttt{git log} with the specified format string. Otherwise, Git's default date formatting is used.
 
@@ -39,7 +39,7 @@ The \texttt{DATE\_FORMAT} option in the configuration file allows users to contr
 DATE_FORMAT=%Y-%m-%d
 \end{lstlisting}
 
-\subsubsection*{Common Format Examples}
+\subsection*{Common Format Examples}
 \begin{itemize}
 	\item \texttt{\%Y-\%m-\%d} – 2025-07-01 (ISO standard)
 	\item \texttt{\%d-\%m-\%Y} – 01-07-2025 (European)
@@ -48,3 +48,65 @@ DATE_FORMAT=%Y-%m-%d
 \end{itemize}
 
 For the full list of supported format tokens, refer to the \texttt{strftime(3)}\cite{strftime(3)} man page or Git's documentation on custom date formats.
+
+
+
+
+
+
+
+
+
+
+\section{GROUP\_BY Configuration Option}
+\label{sec:groupby}
+
+The \texttt{GROUP\_BY} configuration value determines how commit entries in the generated changelog are grouped. Grouping provides structure to the changelog output by organizing commits into logical sections based on time.
+
+\subsection*{Accepted Values}
+\begin{itemize}
+	\item \texttt{day} --- Groups commits by individual date (e.g., \texttt{2025-07-01}).
+	\item \texttt{week} --- Groups commits by ISO calendar week (e.g., \texttt{2025-W27}).
+	\item \texttt{month} --- Groups commits by calendar month (e.g., \texttt{2025-07}).
+	\item \texttt{year} --- Groups commits by year (e.g., \texttt{2025}).
+\end{itemize}
+
+\subsection*{Default Behavior}
+If this configuration value is not set, the default grouping is by \texttt{day}.
+
+\subsection*{Usage}
+This option affects the organization of the changelog. Each group is rendered as a section in the output, prefixed with a heading containing the grouping key (e.g., date or week label). Commits within each group are listed chronologically.
+
+
+
+
+
+
+
+
+
+\section{OUTPUT\_ENTRIES Configuration Option}
+
+The \texttt{OUTPUT\_ENTRIES} configuration option controls which fields are included for each commit entry in the generated changelog output. This value should be a space-separated list of field names, allowing flexible control over the formatting of each entry.
+
+\subsection*{Valid Fields:}
+\begin{itemize}
+	\item \texttt{commit} -- Includes the full commit hash.
+	\item \texttt{author} -- Includes the name of the author who made the commit.
+	\item \texttt{message} -- Includes the commit message.
+\end{itemize}
+
+\subsection*{Special Value:}
+\begin{itemize}
+	\item \texttt{all} -- A shortcut that includes all of the above fields in the default format.
+\end{itemize}
+
+\subsection*{Example Values:}
+\begin{itemize}
+	\item \texttt{OUTPUT\_ENTRIES=commit message}
+	\item \texttt{OUTPUT\_ENTRIES=author}
+	\item \texttt{OUTPUT\_ENTRIES=all}
+\end{itemize}
+
+Each selected field will be printed in order, separated by colons and dashes according to default formatting. This allows for compact or verbose output depending on user preference.
+
