@@ -1,0 +1,17 @@
+\chapter{Configuration}
+\label{ch:configuration}
+\pagestyle{fancy}
+
+The CARA configuration system allows users to define how changelogs are generated and formatted. Configuration files provide a flexible and human-readable way to customize the behavior of the application without modifying the source code.
+
+CARA reads configuration data from a plain text file, where each line defines a key-value pair separated by an equals sign (`=`). Lines beginning with `\#` are treated as comments and ignored. Empty lines and improperly formatted entries are also skipped during parsing.
+
+The configuration system is implemented through the \texttt{Config} class, which is responsible for loading, parsing, and storing configuration values. Users can specify a configuration file at runtime via the \texttt{--config} flag. Once loaded, the configuration can be queried programmatically or used internally to guide CARA’s behavior.
+
+The expected format for configuration entries is:
+
+\begin{lstlisting}[style=cppstyle]
+key=value  # Optional comment.
+\end{lstlisting}
+
+This format provides clarity and simplicity, ensuring easy editing and version control. Each configuration key corresponds to a specific setting or feature within CARA, as documented in subsequent sections of this chapter.
