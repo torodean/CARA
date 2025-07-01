@@ -203,8 +203,8 @@ class GitLog:
 
         MIN_WORDS and MIN_CHARS are mutually exclusive; if both are set, MIN_WORDS takes priority.
         """
-        min_words = self.config.get("MIN_WORDS").lower()
-        min_chars = self.config.get("MIN_CHARS").lower()
+        min_words = self.config.get("MIN_WORDS")
+        min_chars = self.config.get("MIN_CHARS")
         exclude_keywords = self.config.get("EXCLUDE_KEYWORDS", "").lower().split()
         include_keywords = self.config.get("INCLUDE_KEYWORDS", "").lower().split()
 
@@ -245,7 +245,7 @@ class GitLog:
         """
         format_str = "%H|%an|%ad|%s"
         try:
-            date_format = self.config.get("DATE_FORMAT").lower()
+            date_format = self.config.get("DATE_FORMAT")
             if (date_format != None):
                 raw_output = subprocess.check_output(
                     ["git", "-C", self.repo_path, "log", f"--pretty=format:'{format_str}'", f"--date=format:{date_format}"],
@@ -318,7 +318,7 @@ class ChangelogGenerator:
         """
         This will format the entry based on various parameters.
         """
-        output_entries = self.config.get("OUTPUT_ENTRIES").lower().split(" ")
+        output_entries = self.config.get("OUTPUT_ENTRIES").split(" ")
         output = "- "
         
         if (output_entries == "all"):
