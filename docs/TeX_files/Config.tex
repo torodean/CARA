@@ -110,3 +110,34 @@ The \texttt{OUTPUT\_ENTRIES} configuration option controls which fields are incl
 
 Each selected field will be printed in order, separated by colons and dashes according to default formatting. This allows for compact or verbose output depending on user preference.
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Filtering Configuration Options}
+
+The changelog generator supports several filtering options to control which commit messages are included in the final output. These options allow users to exclude trivial or irrelevant commits and focus on meaningful changes.
+
+\begin{description}
+	\item[MIN\_WORDS] Specifies the minimum number of words required in a commit message for it to be included. If the message contains fewer words, it will be discarded. This option takes priority over \texttt{MIN\_CHARS} if both are set.
+	
+	\item[MIN\_CHARS] Specifies the minimum number of characters required in a commit message. If the message is shorter than this length, it will be excluded. Ignored if \texttt{MIN\_WORDS} is also set.
+	
+	\item[EXCLUDE\_KEYWORDS] A space-separated list of keywords. If any of these appear in a commit message (case-insensitive), the message will be excluded from the output.
+	
+	\item[INCLUDE\_KEYWORDS] A space-separated list of required keywords. Only commit messages containing at least one of these keywords (case-insensitive) will be included. If not set, this filter is ignored.
+\end{description}
+
+These options provide a flexible way to tailor the changelog content by filtering out uninformative or irrelevant commits.
+
+
+

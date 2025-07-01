@@ -192,6 +192,49 @@ class GitLog:
         self.repo_path = repo_path
         self.config = config
         self.entries = []
+        
+    def apply_filters(self):
+        """
+        Applies filtering based on configuration:
+        - MIN_WORDS: Minimum number of words in a commit message.
+        - MIN_CHARS: Minimum number of characters in a commit message.
+        - EXCLUDE_KEYWORDS: List of keywords to exclude if found in the message.
+        - INCLUDE_KEYWORDS: List of required keywords; only matching messages are kept.
+
+        MIN_WORDS and MIN_CHARS are mutually exclusive; if both are set, MIN_WORDS takes priority.
+        """
+        min_words = self.config.get("MIN_WORDS").lower()
+        min_chars = self.config.get("MIN_CHARS").lower()
+        exclude_keywords = self.config.get("EXCLUDE_KEYWORDS", "").lower().split()
+        include_keywords = self.config.get("INCLUDE_KEYWORDS", "").lower().split()
+
+        def passes(entry):
+            """
+            Determines if a GitLogEntry satisfies all configured filters:
+            minimum word/character count, inclusion, and exclusion keywords.
+
+            Returns:
+                bool: True if the entry passes all filters, False otherwise.
+            """
+            msg = entry.message.lower()
+
+            if min_words is not None:
+                if len(msg.strip().split()) < int(min_words):
+                    return False
+            elif min_chars is not None:
+                if len(msg.strip()) < int(min_chars):
+                    return False
+
+            if exclude_keywords and any(kw.lower() in msg for kw in exclude_keywords):
+                return False
+
+            if include_keywords and not any(kw.lower() in msg for kw in include_keywords):
+                return False
+
+            return True
+
+        self.entries = [entry for entry in self.entries if passes(entry)]
+
 
     def parse_log(self):
         """
@@ -202,7 +245,7 @@ class GitLog:
         """
         format_str = "%H|%an|%ad|%s"
         try:
-            date_format = self.config.get("DATE_FORMAT")
+            date_format = self.config.get("DATE_FORMAT").lower()
             if (date_format != None):
                 raw_output = subprocess.check_output(
                     ["git", "-C", self.repo_path, "log", f"--pretty=format:'{format_str}'", f"--date=format:{date_format}"],
@@ -275,8 +318,8 @@ class ChangelogGenerator:
         """
         This will format the entry based on various parameters.
         """
-        output_entries = self.config.get("OUTPUT_ENTRIES").split(" ")
-        output = ""
+        output_entries = self.config.get("OUTPUT_ENTRIES").lower().split(" ")
+        output = "- "
         
         if (output_entries == "all"):
             output = f"{entry.commit}: {entry.author} - {entry.message}"
@@ -297,7 +340,7 @@ class ChangelogGenerator:
         Returns:
             str: A formatted changelog string.
         """
-        unit = self.config.get("GROUP_BY", "day")
+        unit = self.config.get("GROUP_BY", "day").lower()
         grouped = self.group_by_time_unit(unit)
         
         output = ["# Changelog\n"]
@@ -380,6 +423,7 @@ def main():
     # Parse git log
     gitlog = GitLog(config, repo_path=cli.repo_path)
     gitlog.parse_log()
+    gitlog.apply_filters()
 
     # Display log entries if verbose mode is enabled
     if cli.verbose:
