@@ -16,6 +16,8 @@ import argparse
 import subprocess
 
 
+VALID_DATE_FORMATS = {"default", "YYYY-MM-DD", "day, YYYY-MM-DD", "fullday, YYYY-MM-DD"}
+
 class CLIArgs:
     """
     Handles parsing and storing command-line arguments for the 
@@ -129,6 +131,18 @@ class Config:
 
     def set(self, key, value):
         self.config_data[key] = value
+        
+    def print_config(self):
+        """
+        Prints all key-value pairs in the loaded configuration.
+        """
+        if not self.config_data:
+            print("No configuration loaded.")
+            return
+
+        print("Current Configuration:")
+        for key, value in self.config_data.items():
+            print(f"{key} = {value}")
 
 
 class GitLogEntry:
@@ -138,7 +152,7 @@ class GitLogEntry:
     Attributes:
         commit (str): The full SHA-1 hash of the commit.
         author (str): The name of the author of the commit.
-        date (str): The commit date in 'YYYY-MM-DD' format.
+        date (str): The commit date formatted based on the config file.
         message (str): The commit message summary.
     """
     def __init__(self, commit, author, date, message):
@@ -155,7 +169,7 @@ class GitLogEntry:
         the author's name, and the commit date.
 
         Returns:
-            str: A string in the format "<abc1234 - Author Name - YYYY-MM-DD>".
+            str: A string in the format "<abc1234 - Author Name - Date>".
         """
         return f"<{self.commit[:7]} - {self.author} - {self.date}>"
 
@@ -165,12 +179,14 @@ class GitLog:
     Handles parsing and storing Git log data for a given repository.
 
     Attributes:
+        config (Config): The configuration to use for formatting.
         repo_path (str): Path to the Git repository.
         entries (list): A list of GitLogEntry objects parsed from the Git log.
     """
-    def __init__(self, repo_path="."):
+    def __init__(self, config=None, repo_path="."):
     
         self.repo_path = repo_path
+        self.config = config
         self.entries = []
 
     def parse_log(self):
@@ -182,10 +198,17 @@ class GitLog:
         """
         format_str = "%H|%an|%ad|%s"
         try:
-            raw_output = subprocess.check_output(
-                ["git", "-C", self.repo_path, "log", f"--pretty=format:'{format_str}'", "--date=short"],
-                universal_newlines=True
-            )
+            date_format = self.config.get("DATE_FORMAT")
+            if (date_format != None):
+                raw_output = subprocess.check_output(
+                    ["git", "-C", self.repo_path, "log", f"--pretty=format:'{format_str}'", f"--date=format:{date_format}"],
+                    universal_newlines=True
+                )
+            else: # default
+                raw_output = subprocess.check_output(
+                    ["git", "-C", self.repo_path, "log", f"--pretty=format:'{format_str}'"],
+                    universal_newlines=True
+                )
         except subprocess.CalledProcessError:
             return
 
@@ -199,8 +222,59 @@ class GitLog:
         return self.entries
 
 
+class ChangelogGenerator:
+    """
+    Generates a changelog from a GitLog instance.
 
+    Attributes:
+        gitlog (GitLog): The GitLog instance containing parsed Git log entries.
+        config (Config): The configuration to use for formatting.
+        entries (list): Cached list of GitLogEntry objects from the GitLog.
+        output (list): The output generated.
+    """
 
+    def __init__(self, gitlog, config):
+        """
+        Initializes the ChangelogGenerator.
+
+        Args:
+            gitlog (GitLog): An instance of the GitLog class containing commit entries.
+        """
+        self.gitlog = gitlog
+        self.config = config
+        self.entries = gitlog.get_entries()
+        self.output = []
+        
+    def format_entry(self, entry):
+        """
+        This will format the entry based on various parameters.
+        """
+        return f"- {entry.date} {entry.author}: {entry.message} ({entry.commit[:7]})"
+
+    def generate(self):
+        """
+        Generates the raw changelog content from the Git log entries.
+
+        Returns:
+            str: A formatted changelog string.
+        """
+        output = ["# Changelog\n"]
+        for entry in self.entries:
+            line = format_entry(entry)
+            output.append(line)
+
+        return "\n".join(output)
+
+    def write_to_file(self, path):
+        """
+        Writes the generated changelog to a file.
+
+        Args:
+            path (str): File path where the changelog should be written.
+        """
+        changelog = self.generate()
+        with open(path, "w") as f:
+            f.write(changelog)
 
 
 
@@ -225,11 +299,14 @@ def main():
     config = Config(cli.config)
 
     # Parse git log
-    gitlog = GitLog(repo_path=cli.repo_path)
+    gitlog = GitLog(config, repo_path=cli.repo_path)
     gitlog.parse_log()
 
     # Display log entries if verbose mode is enabled
     if cli.verbose:
+        print("Parsed configuration:")
+        config.print_config()
+        
         print("Detected git log entiries:")
         for entry in gitlog.get_entries():
             print(entry)

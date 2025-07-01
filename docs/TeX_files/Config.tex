@@ -6,7 +6,7 @@ The CARA configuration system allows users to define how changelogs are generate
 
 CARA reads configuration data from a plain text file, where each line defines a key-value pair separated by an equals sign (`=`). Lines beginning with `\#` are treated as comments and ignored. Empty lines and improperly formatted entries are also skipped during parsing.
 
-The configuration system is implemented through the \texttt{Config} class, which is responsible for loading, parsing, and storing configuration values. Users can specify a configuration file at runtime via the \texttt{--config} flag. Once loaded, the configuration can be queried programmatically or used internally to guide CARA’s behavior.
+The configuration system is implemented through the \texttt{Config} class, which is responsible for loading, parsing, and storing configuration values. Users can specify a configuration file at runtime via the \texttt{--config} flag. Once loaded, the configuration can be queried programmatically or used internally to guide CARA’s behavior. To use the default behavior for any configuration option, simply omit or comment out the option from the configuration file.
 
 The expected format for configuration entries is:
 
@@ -15,3 +15,36 @@ key=value  # Optional comment.
 \end{lstlisting}
 
 This format provides clarity and simplicity, ensuring easy editing and version control. Each configuration key corresponds to a specific setting or feature within CARA, as documented in subsequent sections of this chapter.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\subsection{DATE\_FORMAT Configuration Option}
+
+The \texttt{DATE\_FORMAT} option in the configuration file allows users to control the format in which commit dates are displayed in the generated changelog. This option directly maps to the \texttt{--date=format:<str>} flag in \texttt{git log}, enabling a wide range of formatting options based on user preferences or documentation standards. If this option is defined in the configuration file, CARA will invoke \texttt{git log} with the specified format string. Otherwise, Git's default date formatting is used.
+
+\begin{lstlisting}[style=cppstyle]
+// Example Configuration
+DATE_FORMAT=%Y-%m-%d
+\end{lstlisting}
+
+\subsubsection*{Common Format Examples}
+\begin{itemize}
+	\item \texttt{\%Y-\%m-\%d} – 2025-07-01 (ISO standard)
+	\item \texttt{\%d-\%m-\%Y} – 01-07-2025 (European)
+	\item \texttt{\%B \%d, \%Y} – July 01, 2025 (Verbose)
+	\item \texttt{\%a \%Y-\%m-\%d at \%H:\%M} – Tue 2025-07-01 at 14:30
+\end{itemize}
+
+For the full list of supported format tokens, refer to the \texttt{strftime(3)}\cite{strftime(3)} man page or Git's documentation on custom date formats.
