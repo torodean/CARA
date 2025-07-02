@@ -5,3 +5,49 @@
 The \textbf{Changelog Automation \& Release Assistant (CARA)} is a command-line tool designed to automate the process of generating and maintaining changelogs using Git commit history. CARA parses Git logs and formats the output according to a customizable configuration, allowing users to streamline their release documentation process.
 
 CARA supports multiple verbosity levels, debug output, and configurable input/output paths, making it adaptable to a variety of development workflows. It is intended for developers who maintain changelogs regularly and prefer consistency, automation, and clarity in their version history tracking.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{How to Use CARA}
+
+To use \textbf{CARA}, ensure the main script \texttt{cara.py} and a configuration file (e.g., \texttt{cara.conf}) are present in your project directory. The configuration file specifies options such as grouping method, output format, filtering rules, and more. See chapter \ref{ch:configuration} for more details on the configuration file. Once configured, run the script from your project's root directory using:
+\begin{lstlisting}[style=terminalstyle]
+python3 /path/to/cara.py -c /path/to/cara.conf
+\end{lstlisting}
+CARA will parse your Git commit history, group entries according to your configuration (e.g., by day or week), filter out undesired commits, and generate a structured changelog. The output will be written to the file path specified in your command. For full details on configuration options, refer to the documentation in the \texttt{docs/} directory. Various other optional program arguments are available which can be accessed via the \texttt{-h} flag:
+\begin{lstlisting}[style=terminalstyle]
+$ python3 cara.py -h
+usage: cara.py [-h] [-v] [-d] [-c CONFIG] [-i INPUT] [-o OUTPUT] [-r REPO]
+
+Changelog Automation & Release Assistant (CARA).
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v, --verbose         Enables verbose mode. This will output various program data for
+                        detailed output.
+  -d, --debug           Enables debug mode. This will output various program data for
+                        debugging.
+  -c CONFIG, --config CONFIG
+                        The configuration file to use.
+  -i INPUT, --input INPUT
+                        The input changelog to use. Use this option to overwrite/update an
+                        existing changelog.
+  -o OUTPUT, --output OUTPUT
+                        The output file to use. Use this option to create a new changelog.
+  -r REPO, --repo REPO  The repo path to use. This will default to the current directory.
+\end{lstlisting}
