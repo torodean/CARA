@@ -32,12 +32,14 @@ This format provides clarity and simplicity, ensuring easy editing and version c
 
 \section{DATE\_FORMAT Configuration Option}
 
-The \texttt{DATE\_FORMAT} option in the configuration file allows users to control the format in which commit dates are displayed in the generated changelog. This option directly maps to the \texttt{--date=format:<str>} flag in \texttt{git log}, enabling a wide range of formatting options based on user preferences or documentation standards. If this option is defined in the configuration file, CARA will invoke \texttt{git log} with the specified format string. Otherwise, Git's default date formatting is used.
+The \texttt{DATE\_FORMAT} option in the configuration file allows users to control the format in which commit dates are displayed in the generated changelog. This option directly maps to the \texttt{--date=format:<str>} flag in \texttt{git log}, enabling a wide range of formatting options based on user preferences or documentation standards. If this option is defined in the configuration file, CARA will invoke \texttt{git log} with the specified format string. Otherwise, Git's default date formatting is used. 
 
 \begin{lstlisting}[style=cppstyle]
 // Example Configuration
 DATE_FORMAT=%Y-%m-%d
 \end{lstlisting}
+
+This formatted date is used in the changelog output entries. The header dates are more-so based on the \texttt{GROUP_BY} option (see section \ref{sec:groupby}).
 
 \subsection*{Common Format Examples}
 \begin{itemize}
@@ -61,13 +63,13 @@ For the full list of supported format tokens, refer to the \texttt{strftime(3)}\
 \section{GROUP\_BY Configuration Option}
 \label{sec:groupby}
 
-The \texttt{GROUP\_BY} configuration value determines how commit entries in the generated changelog are grouped. Grouping provides structure to the changelog output by organizing commits into logical sections based on time.
+The \texttt{GROUP\_BY} configuration value determines how commit entries in the generated changelog are grouped. Grouping provides structure to the changelog output by organizing commits into logical sections based on time. This option will set pre-formatted headers based on the groupings.
 
 \subsection*{Accepted Values}
 \begin{itemize}
-	\item \texttt{day} --- Groups commits by individual date (e.g., \texttt{2025-07-01}).
+	\item \texttt{day} --- Groups commits by individual date (e.g., \texttt{2025-07-01} (DayName)).
 	\item \texttt{week} --- Groups commits by ISO calendar week (e.g., \texttt{2025-W27}).
-	\item \texttt{month} --- Groups commits by calendar month (e.g., \texttt{2025-07}).
+	\item \texttt{month} --- Groups commits by calendar month (e.g., \texttt{2025-07} (MonthName)).
 	\item \texttt{year} --- Groups commits by year (e.g., \texttt{2025}).
 \end{itemize}
 
