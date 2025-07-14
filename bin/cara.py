@@ -204,8 +204,8 @@ class GitLog:
         """
         min_words = self.config.get("MIN_WORDS")
         min_chars = self.config.get("MIN_CHARS")
-        exclude_keywords = self.config.get("EXCLUDE_KEYWORDS", "").lower().split()
-        include_keywords = self.config.get("INCLUDE_KEYWORDS", "").lower().split()
+        exclude_keywords = self.config.get("EXCLUDE_KEYWORDS", "").lower().split(",")
+        include_keywords = self.config.get("INCLUDE_KEYWORDS", "").lower().split(",")
 
         def passes(entry):
             """
