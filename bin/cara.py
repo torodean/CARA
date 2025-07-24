@@ -1,16 +1,15 @@
 #!/bin/python3
-##############################################################
-## C.A.R.A
-## Changelog Automation & Release Assistant
-## Created by: Antonius Torode
-##############################################################
-## The purpose of this application/script is to provide some
-## automation for updating a changelog by using the git log
-## and git commit history. This app provides configuration
-## in order to setup the changelog formatting and logging
-## features to match various functionalities.
-## See https://github.com/torodean/CARA/blob/main/docs/CARAManual.pdf
-##############################################################
+"""
+ Changelog Automation & Release Assistant (CARA)
+ Created by: Antonius Torode
+----------------------------------------------------------
+ The purpose of this application/script is to provide some
+ automation for updating a changelog by using the git log
+ and git commit history. This app provides configuration
+ in order to setup the changelog formatting and logging
+ features to match various functionalities.
+ See https://github.com/torodean/CARA/blob/main/docs/CARAManual.pdf
+"""
 
 from collections import defaultdict
 import datetime
