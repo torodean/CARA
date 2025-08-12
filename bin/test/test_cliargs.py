@@ -10,7 +10,7 @@ from pathlib import Path
 
 sys.path.append('../')
 
-from cara import CLIArgs  # Replace with actual module name
+from cara import CLIArgs
 
 
 def run_cli_with_args(args):
