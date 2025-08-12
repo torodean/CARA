@@ -10,7 +10,7 @@ import pytest
 
 sys.path.append('../')
 
-from cara import Config  # Replace with actual module name
+from cara import Config
 
 
 def create_temp_config(content):
