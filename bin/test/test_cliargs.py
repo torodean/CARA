@@ -1,4 +1,9 @@
-# test_cliargs.py
+#!/bin/python3
+"""
+ test_cliargs.py
+ Created by: Antonius Torode
+ Description: This file tests the CLIArgs class of CARA.
+"""
 import sys
 import pytest
 from pathlib import Path
