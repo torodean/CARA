@@ -10,7 +10,13 @@ from cara import CLIArgs  # Replace with actual module name
 
 def run_cli_with_args(args):
     """
-    Helper to run CLIArgs with mocked sys.argv.
+    Helper function to create a CLIArgs instance using mocked command-line arguments.
+
+    Args:
+        args (list[str]): List of arguments to simulate, excluding the program name.
+
+    Returns:
+        CLIArgs: An initialized CLIArgs object with parsed values.
     """
     original_argv = sys.argv
     sys.argv = ["prog"] + args
@@ -21,6 +27,9 @@ def run_cli_with_args(args):
 
 
 def test_no_arguments_defaults():
+    """
+    Test that CLIArgs sets all values to defaults when no arguments are provided.
+    """
     cli = run_cli_with_args([])
     assert cli.verbose is False
     assert cli.debug is False
@@ -39,11 +48,17 @@ def test_no_arguments_defaults():
     (["--repo", "/tmp/repo"], "repo_path", "/tmp/repo"),
 ])
 def test_each_flag_individually(flag, attr, expected):
+    """
+    Test that each CLI flag correctly sets the corresponding attribute when provided individually.
+    """
     cli = run_cli_with_args(flag)
     assert getattr(cli, attr) == expected
 
 
 def test_multiple_flags_together():
+    """
+    Test that multiple CLI flags provided together set all corresponding attributes correctly.
+    """
     cli = run_cli_with_args([
         "--verbose",
         "--debug",
@@ -61,6 +76,9 @@ def test_multiple_flags_together():
 
 
 def test_defaults_when_some_args_omitted():
+    """
+    Test that CLIArgs sets defaults for omitted arguments when some arguments are provided.
+    """
     cli = run_cli_with_args(["--verbose", "--input", "in.md"])
     assert cli.verbose is True
     assert cli.debug is False  # default
