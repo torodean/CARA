@@ -12,7 +12,7 @@ from pathlib import Path
 
 sys.path.append('../')
 
-from cara import ChangelogGenerator, GitLogEntry  # Replace with actual module paths
+from cara import ChangelogGenerator, GitLogEntry
 
 
 class DummyConfig:
