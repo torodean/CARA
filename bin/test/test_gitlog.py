@@ -10,8 +10,7 @@ import pytest
 
 sys.path.append('../')
 
-from cara import GitLog, GitLogEntry, Config  # Replace with actual module name
-
+from cara import GitLog, GitLogEntry, Config
 
 def make_entry(commit="abc1234567890", author="Author", full_date="2025,08,12,Tuesday,August",
                display_date="2025-08-12", message="Test commit message"):
