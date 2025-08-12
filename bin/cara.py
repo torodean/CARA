@@ -36,7 +36,7 @@ class CLIArgs:
         self.parser = argparse.ArgumentParser(
             description='Changelog Automation & Release Assistant (CARA).'
         )
-        self._add_arguments()
+        self.add_arguments()
         self.args = self.parser.parse_args()
 
         self.verbose = self.args.verbose
@@ -46,7 +46,7 @@ class CLIArgs:
         self.output_file = self.args.output
         self.repo_path = self.args.repo
 
-    def _add_arguments(self):
+    def add_arguments(self):
         """
         Defines and registers all expected command-line arguments.
         """
