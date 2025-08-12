@@ -31,4 +31,4 @@ jobs:
     - name: Run tests
       run: |
         cd bin/test
-        pytest -vv test_cliargs.py test_config.py
+        pytest -vv test_cliargs.py test_config.py test_gitlog.py
