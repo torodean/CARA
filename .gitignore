@@ -1,96 +1,59 @@
-# Prerequisites
-*.d
+# Python
+__pycache__/
+*.py[cod]
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+# Packaging / distribution
+build/
+dist/
+*.egg-info/
 
-# Precompiled Headers
-*.gch
-*.pch
+# Virtual environments
+.venv/
+venv/
+env/
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
 
 # LaTeX Files
 *.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.idx
+*.ilg
+*.ind
+*.lof
 *.log
+*.lot
+*.nav
+*.out
+*.snm
 *.synctex.gz
 *.toc
-*.o
-*.out
-*.ilg
+*.vrb
 
-# Compiled Object files
+# Editors
+*.swp
+*.swo
+*~
+
+# Operating systems
 **/.DS_Store
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-
-**/cmake-build-debug
-**/CMakeCache.txt
-**/cmake_install.cmake
-**/install_manifest.txt
-**/CMakeFiles/
-**/CTestTestfile.cmake
-**/Makefile
-**/*.cbp
-**/CMakeScripts
-**/compile_commands.json
+Thumbs.db
 
 ## Local 
 
 .idea
 .idea/*.xml
+.vscode/
 
-build/**/*
-cmake-build-debug/**/*
 release/**/*
-Testing/**/*
 
 bin/Makefile
 bin/**/Makefile
