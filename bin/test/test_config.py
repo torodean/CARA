@@ -4,11 +4,8 @@
  Created by: Antonius Torode
  Description: This file tests the Config class of CARA.
 """
-import sys
 import tempfile
 import pytest
-
-sys.path.append('../')
 
 from cara import Config
 
