@@ -191,20 +191,40 @@ class GitLog:
         self.config = config
         self.entries = []
         
+    @staticmethod
+    def parse_keywords(value):
+        """
+        Parses a keyword list from a configuration value. Keywords may be
+        separated by commas and/or whitespace. Returns an empty list when the
+        option is unset or contains no keywords.
+
+        Args:
+            value (str or None): The raw configuration value.
+
+        Returns:
+            list: A list of lower-cased keywords (possibly empty).
+        """
+        if not value:
+            return []
+        return [word for word in value.lower().replace(",", " ").split() if word]
+
     def apply_filters(self):
         """
         Applies filtering based on configuration:
         - MIN_WORDS: Minimum number of words in a commit message.
         - MIN_CHARS: Minimum number of characters in a commit message.
-        - EXCLUDE_KEYWORDS: List of keywords to exclude if found in the message.
-        - INCLUDE_KEYWORDS: List of required keywords; only matching messages are kept.
+        - EXCLUDE_KEYWORDS: Keywords to exclude if found in the message
+          (comma and/or whitespace separated).
+        - INCLUDE_KEYWORDS: Required keywords; only matching messages are kept
+          (comma and/or whitespace separated).
 
         MIN_WORDS and MIN_CHARS are mutually exclusive; if both are set, MIN_WORDS takes priority.
+        Unset keyword options apply no filter.
         """
         min_words = self.config.get("MIN_WORDS")
         min_chars = self.config.get("MIN_CHARS")
-        exclude_keywords = self.config.get("EXCLUDE_KEYWORDS", "").lower().split(",")
-        include_keywords = self.config.get("INCLUDE_KEYWORDS", "").lower().split(",")
+        exclude_keywords = self.parse_keywords(self.config.get("EXCLUDE_KEYWORDS"))
+        include_keywords = self.parse_keywords(self.config.get("INCLUDE_KEYWORDS"))
 
         def passes(entry):
             """
@@ -334,18 +354,17 @@ class ChangelogGenerator:
         self.gitlog = gitlog
         self.config = config
         self.entries = gitlog.get_entries()
-        self.full_dates = self.entries[2] # the index of the full_dates field.
         self.output = []
         
     def format_entry(self, entry):
         """
         This will format the entry based on various parameters.
         """
-        output_entries = self.config.get("OUTPUT_ENTRIES").split(" ")
+        output_entries = self.config.get("OUTPUT_ENTRIES", "message").split()
         output = "- "
         
-        if (output_entries == "all"):
-            output = f"{entry.commit}: {entry.author} -> {entry.message}"
+        if ("all" in output_entries):
+            output = f"- {entry.commit}: {entry.author} -> {entry.message}"
         else:
             if ("date" in output_entries):
                 output += f"[{entry.display_date}] "
@@ -356,7 +375,9 @@ class ChangelogGenerator:
             if ("message" in output_entries):
                 output += f"{entry.message}"
         
-        # Check if the output ends with a period, and add one if it doesn't
+        # Check if the output ends with punctuation, and add a period if it doesn't.
+        # Trailing whitespace is stripped first so the period is not appended after a space.
+        output = output.rstrip()
         if not output.endswith(".") and not output.endswith("?") and not output.endswith("!"):
             output += "."
         
@@ -460,15 +481,6 @@ class ChangelogGenerator:
         return dict(sorted_grouped)
 
 
-
-
-
-
-
-
-
-
-
 def main():
     """
     Main entry point for the CARA application. Handles argument parsing,
@@ -497,8 +509,5 @@ def main():
     # Generate the changelog
     generator = ChangelogGenerator(gitlog, config)
     generator.write_to_file(cli.output_file)
-
-
-
 if __name__ == "__main__":
     main()
