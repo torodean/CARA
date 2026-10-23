@@ -8,8 +8,6 @@ import sys
 from unittest.mock import patch
 import pytest
 
-sys.path.append('../')
-
 from cara import GitLog, GitLogEntry, Config
 
 def make_entry(commit="abc1234567890", author="Author", full_date="2025,08,12,Tuesday,August",
@@ -37,7 +35,8 @@ def test_apply_filters_min_words():
     log = GitLog(config)
     log.entries = [make_entry(message="one two"), make_entry(message="one two three")]
     log.apply_filters()
-    assert all(len(e.message.split()) >= 3 for e in log.entries)
+    assert len(log.entries) == 1
+    assert log.entries[0].message == "one two three"
 
 
 def test_apply_filters_min_chars():
@@ -49,7 +48,8 @@ def test_apply_filters_min_chars():
     log = GitLog(config)
     log.entries = [make_entry(message="short"), make_entry(message="long enough message")]
     log.apply_filters()
-    assert all(len(e.message) >= 10 for e in log.entries)
+    assert len(log.entries) == 1
+    assert log.entries[0].message == "long enough message"
 
 
 def test_apply_filters_exclude_keywords():
@@ -61,7 +61,8 @@ def test_apply_filters_exclude_keywords():
     log = GitLog(config)
     log.entries = [make_entry(message="skip this commit"), make_entry(message="keep this one")]
     log.apply_filters()
-    assert all("skip" not in e.message.lower() for e in log.entries)
+    assert len(log.entries) == 1
+    assert log.entries[0].message == "keep this one"
 
 
 def test_apply_filters_include_keywords():
@@ -73,7 +74,8 @@ def test_apply_filters_include_keywords():
     log = GitLog(config)
     log.entries = [make_entry(message="new feature added"), make_entry(message="fix bug")]
     log.apply_filters()
-    assert all("feature" in e.message.lower() for e in log.entries)
+    assert len(log.entries) == 1
+    assert log.entries[0].message == "new feature added"
 
 
 @patch("subprocess.check_output")
@@ -131,3 +133,34 @@ def test_print_entries(capsys):
     log.print_entries()
     captured = capsys.readouterr()
     assert "2025,08,12,Tuesday,August | Author | abc1234 - Test commit message" in captured.out
+
+
+def test_apply_filters_no_options_keeps_all():
+    """
+    Regression test: with no filter options set, apply_filters() must keep
+    every entry. (Unset keyword options used to produce [""] which matched
+    every message and dropped all entries.)
+    """
+    config = Config()
+    log = GitLog(config)
+    log.entries = [make_entry(message="first commit message"), make_entry(message="second commit message")]
+    log.apply_filters()
+    assert len(log.entries) == 2
+
+
+def test_apply_filters_keyword_separators():
+    """
+    Test that EXCLUDE_KEYWORDS honors both comma and whitespace separators.
+    """
+    config = Config()
+    config.set("EXCLUDE_KEYWORDS", "skip, drop  wip")
+    log = GitLog(config)
+    log.entries = [
+        make_entry(message="skip this commit"),
+        make_entry(message="drop that commit"),
+        make_entry(message="wip something here"),
+        make_entry(message="keep this one here")
+    ]
+    log.apply_filters()
+    assert len(log.entries) == 1
+    assert log.entries[0].message == "keep this one here"
