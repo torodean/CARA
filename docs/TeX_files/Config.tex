@@ -31,6 +31,7 @@ This format provides clarity and simplicity, ensuring easy editing and version c
 
 
 \section{DATE\_FORMAT Configuration Option}
+\label{section:date_format}
 
 The \texttt{DATE\_FORMAT} option in the configuration file allows users to control the format in which commit dates are displayed in the generated changelog. This option directly maps to the \texttt{--date=format:<str>} flag in \texttt{git log}, enabling a wide range of formatting options based on user preferences or documentation standards. If this option is defined in the configuration file, CARA will invoke \texttt{git log} with the specified format string. Otherwise, Git's default date formatting is used. 
 
@@ -39,7 +40,7 @@ The \texttt{DATE\_FORMAT} option in the configuration file allows users to contr
 DATE_FORMAT=%Y-%m-%d
 \end{lstlisting}
 
-This formatted date is used in the changelog output entries. The header dates are more-so based on the \texttt{GROUP_BY} option (see section \ref{sec:groupby}).
+This formatted date is used in the changelog output entries. The header dates are more-so based on the \texttt{GROUP\_BY} option (see section \ref{sec:groupby}).
 
 \subsection*{Common Format Examples}
 \begin{itemize}
@@ -89,10 +90,11 @@ This option affects the organization of the changelog. Each group is rendered as
 
 \section{OUTPUT\_ENTRIES Configuration Option}
 
-The \texttt{OUTPUT\_ENTRIES} configuration option controls which fields are included for each commit entry in the generated changelog output. This value should be a space-separated list of field names, allowing flexible control over the formatting of each entry.
+The \texttt{OUTPUT\_ENTRIES} configuration option controls which fields are included for each commit entry in the generated changelog output. This value should be a whitespace-separated list of field names, allowing flexible control over the formatting of each entry. If this option is omitted, the default is \texttt{message}, so only the commit message is printed.
 
 \subsection*{Valid Fields:}
 \begin{itemize}
+	\item \texttt{date} -- Includes the commit date, enclosed in brackets and formatted according to \texttt{DATE\_FORMAT} (see section \ref{section:date_format}).
 	\item \texttt{commit} -- Includes the full commit hash.
 	\item \texttt{author} -- Includes the name of the author who made the commit.
 	\item \texttt{message} -- Includes the commit message.
@@ -100,17 +102,21 @@ The \texttt{OUTPUT\_ENTRIES} configuration option controls which fields are incl
 
 \subsection*{Special Value:}
 \begin{itemize}
-	\item \texttt{all} -- A shortcut that includes all of the above fields in the default format.
+	\item \texttt{all} -- A shortcut equivalent to \texttt{commit author message}, rendered in the default layout (commit hash, then author, then message).
 \end{itemize}
 
 \subsection*{Example Values:}
 \begin{itemize}
+	\item \texttt{OUTPUT\_ENTRIES=date message}
 	\item \texttt{OUTPUT\_ENTRIES=commit message}
 	\item \texttt{OUTPUT\_ENTRIES=author}
 	\item \texttt{OUTPUT\_ENTRIES=all}
 \end{itemize}
 
-Each selected field will be printed in order, separated by colons and dashes according to default formatting. This allows for compact or verbose output depending on user preference.
+Each selected field is printed in the order shown in the list above, separated by colons and arrows according to the default formatting. This allows for compact or verbose output depending on user preference.
+
+\subsection*{Automatic Punctuation}
+Every generated entry line is automatically terminated with a period, unless the rendered line already ends with \texttt{.}, \texttt{?}, or \texttt{!}. This keeps entries consistent when commit messages are terse.
 
 
 
@@ -125,7 +131,8 @@ Each selected field will be printed in order, separated by colons and dashes acc
 
 
 
-\subsection{Filtering Configuration Options}
+\section{Filtering Configuration Options}
+\label{section:filtering}
 
 The changelog generator supports several filtering options to control which commit messages are included in the final output. These options allow users to exclude trivial or irrelevant commits and focus on meaningful changes.
 
@@ -134,12 +141,11 @@ The changelog generator supports several filtering options to control which comm
 	
 	\item[MIN\_CHARS] Specifies the minimum number of characters required in a commit message. If the message is shorter than this length, it will be excluded. Ignored if \texttt{MIN\_WORDS} is also set.
 	
-	\item[EXCLUDE\_KEYWORDS] A space-separated list of keywords. If any of these appear in a commit message (case-insensitive), the message will be excluded from the output.
+	\item[EXCLUDE\_KEYWORDS] A comma- and/or whitespace-separated list of keywords. If any of these appear in a commit message (case-insensitive), the message will be excluded from the output. If not set, this filter is ignored.
 	
-	\item[INCLUDE\_KEYWORDS] A space-separated list of required keywords. Only commit messages containing at least one of these keywords (case-insensitive) will be included. If not set, this filter is ignored.
+	\item[INCLUDE\_KEYWORDS] A comma- and/or whitespace-separated list of required keywords. Only commit messages containing at least one of these keywords (case-insensitive) will be included. If not set, this filter is ignored.
 \end{description}
 
 These options provide a flexible way to tailor the changelog content by filtering out uninformative or irrelevant commits.
-
 
 
