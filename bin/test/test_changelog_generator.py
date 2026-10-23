@@ -4,13 +4,10 @@ test_changelog_generator.py
 Created by: Antonius Torode
 Description: Tests the ChangelogGenerator class of CARA.
 """
-import sys
 import datetime
 from collections import defaultdict
 import pytest
 from pathlib import Path
-
-sys.path.append('../')
 
 from cara import ChangelogGenerator, GitLogEntry
 
@@ -44,7 +41,7 @@ def test_format_entry_all_fields():
     entry = GitLogEntry("abc1234", "Alice", "2024,08,12,Monday,August", "2024-08-12", "Initial commit")
     gen = ChangelogGenerator(DummyGitLog([entry]), config)
     formatted = gen.format_entry(entry)
-    assert formatted == "abc1234: Alice -> Initial commit."
+    assert formatted == "- abc1234: Alice -> Initial commit."
 
 
 @pytest.mark.parametrize("fields, expected", [
