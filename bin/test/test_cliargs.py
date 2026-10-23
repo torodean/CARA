@@ -8,8 +8,6 @@ import sys
 import pytest
 from pathlib import Path
 
-sys.path.append('../')
-
 from cara import CLIArgs
 
 
